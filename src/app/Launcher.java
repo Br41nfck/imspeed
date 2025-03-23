@@ -5,9 +5,9 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
 
-public class Launcher 
+public class Launcher
 {
-	public static void main(String[] args) throws FileNotFoundException 
+	public static void main(String[] args) throws FileNotFoundException
 	{
 		if (args.length > 0)
 		{

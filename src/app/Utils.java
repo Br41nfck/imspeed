@@ -36,30 +36,33 @@ import javafx.scene.text.Text;
 import javafx.util.Duration;
 import menu.Select;
 
-public class Utils {
-	/* get current operating system */
-	public static final String OS = System.getProperty("os.name").toLowerCase(); 
+public class Utils
+{
+	// Get current operating system
+	public static final String OS = System.getProperty("os.name").toLowerCase();
 	public static final boolean WINDOWS = !OS.equals("linux");
 	public static final String SAVE_DIR = WINDOWS ? (System.getenv("APPDATA") + "\\imspeed\\")
-			: (System.getenv("HOME") + "/.local/share/imspeed/");
+	: (System.getenv("HOME") + "/.local/share/imspeed/");
 	public static final String PATH_SCORE_TEMPLATE = "/resources/scoreboard";
 	public static final String PATH_SCORE_PUBLIC = SAVE_DIR + "scoreboard";
 
 	private static int save_retry = 0;
 
-	/* creates data file and sets new key */
-	public static void createScoreboard() {
+	// Creates data file and sets new key
+	public static void createScoreboard()
+	{
 		new File(SAVE_DIR).mkdir();
-		try {
-			/* copy template data to byte array */
+		try
+		{
+			// Copy template data to byte array
 			InputStream privateData = Window.class.getResourceAsStream(PATH_SCORE_TEMPLATE);
 			Files.copy(privateData, Paths.get(PATH_SCORE_PUBLIC), StandardCopyOption.REPLACE_EXISTING);
 			privateData.close();
 
-			/* set new key */
+			// Set new key
 			if (setDataKey(getNewKey())) Log.success("Successfully created data file");
-			
-		} catch (IOException e)
+		}
+		catch (IOException e)
 		{
 			Log.error("Could not create data file: " + e);
 		}
@@ -67,20 +70,20 @@ public class Utils {
 
 	public static ResultSet getScores(String sortBy, String order) throws SQLException
 	{
-		/* get data file */
+		// Get data file
 		final File scoreboard = new File(PATH_SCORE_PUBLIC);
-		/* get modification time */
+		// Get modification time
 		final long modTime = scoreboard.lastModified();
 		final String sql = String.format("SELECT * FROM scoreboard ORDER BY %s %s, Score DESC", sortBy, order);
 
-		/* execute query to set the level value */
+		// Execute query to set the level value
 		Statement st = getDataConnection(PATH_SCORE_PUBLIC).createStatement();
 		PreparedStatement ps = st.getConnection().prepareStatement(sql);
 		ResultSet results = ps.executeQuery();
 
 		ps.close();
 		st.close();
-		/* restore modification time */
+		// Restore modification time
 		scoreboard.setLastModified(modTime);
 
 		return results;
@@ -88,7 +91,7 @@ public class Utils {
 
 	public static ArrayList<ScoreboardEntry> getRows(String sortBy, String order)
 	{
-		 /* list of all returned scores */
+		// List of all returned scores
 		final ArrayList<ScoreboardEntry> entries = new ArrayList<>();
 		final ScoreboardEntry activeEntry = ScoreboardEntry.activeEntry;
 		try
@@ -124,20 +127,25 @@ public class Utils {
 		return entries;
 	}
 
-	/* returns true only if data key was read and is correct, false otherwise */
+	// Returns true only if data key was read and is correct, false otherwise
 	public static boolean isCorrectHash()
 	{
 		try
 		{
-			final String key = getHash(); // get stored key
-			final int x = Character.getNumericValue(key.charAt(0)); // extract prefix
-			final String encodedKey = key.substring(1, key.length()); // extract encoded key
-
-			final long modTime = new File(PATH_SCORE_PUBLIC).lastModified(); // get current modification time
-			final String decodedKey = new String(Base64.getDecoder().decode(encodedKey)); // get currently saved key
-			final double decodedTime = Double.valueOf(decodedKey) / Math.pow(Math.E, x); // decode the key
-
-			return modTime == decodedTime; // check if flags are the same
+			// Get stored key
+			final String key = getHash();
+			// Extract prefix
+			final int x = Character.getNumericValue(key.charAt(0));
+			// Extract encoded key
+			final String encodedKey = key.substring(1, key.length());
+			// Get current modification time
+			final long modTime = new File(PATH_SCORE_PUBLIC).lastModified();
+			// Get currently saved key
+			final String decodedKey = new String(Base64.getDecoder().decode(encodedKey));
+			// Decode the key
+			final double decodedTime = Double.valueOf(decodedKey) / Math.pow(Math.E, x);
+			// Check if flags are the same
+			return modTime == decodedTime;
 		}
 		catch (Exception e)
 		{
@@ -146,8 +154,9 @@ public class Utils {
 		}
 	}
 
-	/* returns control hash from scoreboard file */
-	public static String getHash() throws Exception {
+	// Returns control hash from scoreboard file
+	public static String getHash() throws Exception
+	{
 		try
 		{
 			Statement st = getDataConnection(PATH_SCORE_PUBLIC).createStatement();
@@ -158,21 +167,20 @@ public class Utils {
 
 			st.close();
 			return hash;
-		} catch (SQLException e)
+		}
+		catch (SQLException e)
 		{
 			throw new Exception("Could not get results from data file: " + e.getMessage());
 		}
 	}
 
-	/* saves score to scoreboard file */
+	// Saves score to scoreboard file
 	public static boolean saveScore(String scoreStr)
 	{
 		if (!fileExists(PATH_SCORE_PUBLIC)) createScoreboard();
-
 		else
 		{
 			if (isCorrectHash()) Log.success("Hash is correct");
-			
 			else
 			{
 				Log.warning("Hash is incorrect, reseting...");
@@ -223,16 +231,18 @@ public class Utils {
 		}
 	}
 
-	/* sets data key value */
+	// Sets data key value
 	public static boolean setDataKey(String value)
 	{
-		final File scoreboard = new File(PATH_SCORE_PUBLIC); // get data file
-		final long modTime = scoreboard.lastModified(); // get modification time
+		// Get data file
+		final File scoreboard = new File(PATH_SCORE_PUBLIC);
+		// Get modification time
+		final long modTime = scoreboard.lastModified();
 		final String sql = "UPDATE hash SET hash=?";
 
 		try
 		{
-			/* execute query to set the level value */
+			// Execute query to set the level value
 			Statement st = getDataConnection(PATH_SCORE_PUBLIC).createStatement();
 			PreparedStatement ps = st.getConnection().prepareStatement(sql);
 
@@ -240,8 +250,8 @@ public class Utils {
 			ps.executeUpdate();
 			ps.close();
 			st.close();
-
-			scoreboard.setLastModified(modTime); // restore modification time
+			// Restore modification time
+			scoreboard.setLastModified(modTime);
 			return true;
 		}
 		catch (SQLException e)
@@ -251,25 +261,25 @@ public class Utils {
 		}
 	}
 
-	/* returns formatted date from given time in milis */
+	// Returns formatted date from given time in milliseconds
 	public static String formatDate(long milis, String format)
 	{
 		return new SimpleDateFormat(format).format(new Date(milis));
 	}
 
-	/* fallback for default formatting */
+	// Fallback for default formatting
 	public static String formatDate(long milis)
 	{
 		return formatDate(milis, "dd.MM.yyyy HH:mm:ss");
 	}
 
-	/* returns string name of the selected difficulty */
+	// Returns string name of the selected difficulty
 	public static String parseDifficulty(int nr)
 	{
 		return Scenes.loadedDifficulties[nr - 1];
 	}
 
-	/* formats seconds into readable time */
+	// Formats seconds into readable time
 	public static String[] formatTimePlayed(double totalSeconds)
 	{
 		int total = (int) totalSeconds;
@@ -283,21 +293,23 @@ public class Utils {
 		return new String[] { hoursPrint, minutesPrint, secondsPrint };
 	}
 
-	/* returns connection for data reading & writing */
+	// Returns connection for data reading & writing
 	public static Connection getDataConnection(String path) throws SQLException
 	{
 		return DriverManager.getConnection("jdbc:ucanaccess://" + path);
 	}
 
-	/* generate new key for data file */
+	// Generate new key for data file
 	public static String getNewKey()
 	{
 		Random r = new Random();
-
-		final long modTime = new File(PATH_SCORE_PUBLIC).lastModified(); // get current modification time
-		final int x = r.nextInt(9) + 1; // get random exponent
-		final double calculatedKey = modTime * Math.pow(Math.E, x); // calculate key
-		// return key inbase64
+		// Get current modification time
+		final long modTime = new File(PATH_SCORE_PUBLIC).lastModified();
+		// Get random exponent
+		final int x = r.nextInt(9) + 1;
+		// Calculate key
+		final double calculatedKey = modTime * Math.pow(Math.E, x);
+		// Return key in base64
 		return (x + Base64.getEncoder().encodeToString(String.valueOf(calculatedKey).getBytes()));
 	}
 
@@ -312,40 +324,33 @@ public class Utils {
 		resultsContainer.getChildren().removeAll(toRemove);
 
 		final int starting = (page - 1) * 15;
-		/* add max 15 new results per page */
+		// Add max 15 new results per page
 		for (int i = starting; i < starting + 15 && i < entries.size(); i++)
 			resultsContainer.getChildren().add(entries.get(i));
 	}
 
-	/* function to calculate new word's position and value */
+	// Function to calculate new word's position and value
 	public static Word createWord(List<String> strings, List<Integer> xVal_final, List<Integer> yVal_final, List<Word> fresh)
 	{
 		List<Integer> xVal = Window.xVal, yVal = Window.yVal;
-
 		if (xVal.size() < 1)
 			xVal = new ArrayList<>(xVal_final);
-		
 		if (yVal.size() < 1)
 			yVal = new ArrayList<>(yVal_final);
-		
-
 		Random random = new Random();
 
-		/* get random indexes */
+		// Get random indexes
 		int rndmx = random.nextInt(xVal.size());
 		int rndmy = random.nextInt(yVal.size());
+		// Get random text from all words
+		String value = strings.get(random.nextInt(strings.size()));
 
-		String value = strings.get(random.nextInt(strings.size())); // get random text from all words
-
-		/* set x,y and remove them from lists */
+		// Set x,y and remove them from lists
 		int y = yVal.get(rndmy);
 		yVal.remove(rndmy);
 		int x = xVal.get(rndmx);
 		xVal.remove(rndmx);
-
-		/*
-		 * check for word collision in the same row and calculate the final x coordinate
-		 */
+		// Check for word collision in the same row and calculate the final x coordinate
 		for (Word w : fresh)
 			if (w.getTranslateY() == y)
 				while (w.getTranslateX() <= (value.length() * 9) + x + 20) x -= 5;
@@ -355,7 +360,7 @@ public class Utils {
 		return w;
 	}
 
-	/* fades in given node */
+	// Fades in given node
 	public static void fadeIn(Node node, int duration)
 	{
 		FadeTransition ft = new FadeTransition(Duration.millis(duration), node);
@@ -387,7 +392,7 @@ public class Utils {
 		};
 	}
 
-	/* removes all not saved scores / all with NULL as name */
+	// Removes all not saved scores / all with NULL as name
 	public static boolean removeRecord(String date)
 	{
 		final File scoreboard = new File(PATH_SCORE_PUBLIC);
@@ -464,6 +469,7 @@ public class Utils {
 		return inputBox(messageStr, 15);
 	}
 
+	// ScoreBoard Input Box
 	public static Node[] inputBox(String messageStr, int maxChars)
 	{
 		final StackPane stack = new StackPane();
@@ -496,14 +502,14 @@ public class Utils {
 		Text message = createText(messageStr, Color.WHITE, Scenes.FONT_TEXT, 17);
 		message.setTranslateX(shiftX);
 
-		Text signL = createText("[", Color.WHITE, Scenes.FONT_TEXT, 17);
+		Text signL = createText("|", Color.WHITE, Scenes.FONT_TEXT, 17);
 		shiftX += message.getLayoutBounds().getWidth() + 20;
 		signL.setTranslateX(shiftX);
 
 		shiftX += 10;
 		input.setTranslateX(shiftX);
 
-		Text signR = createText("]", Color.WHITE, Scenes.FONT_TEXT, 17);
+		Text signR = createText("|", Color.WHITE, Scenes.FONT_TEXT, 17);
 		shiftX += 120;
 		signR.setTranslateX(shiftX);
 
@@ -518,7 +524,7 @@ public class Utils {
 		return new Node[] { stack, input };
 	}
 
-	public static AnimationTimer getBackgroundTimer(int xRange, int yRange, Pane root, Node... toFront) 
+	public static AnimationTimer getBackgroundTimer(int xRange, int yRange, Pane root, Node... toFront)
 	{
 		return getBackgroundTimer(xRange, yRange, root, 30, 200_000_000, 5_000_000, toFront);
 	}
@@ -529,17 +535,18 @@ public class Utils {
 	}
 
 	public static AnimationTimer getBackgroundTimer(int xRange, int yRange, Pane root, int initialAmount,
-			long creationDelay, long speed, Node... toFront) 
+			long creationDelay, long speed, Node... toFront)
 			{
 		Random random = new Random();
-
+		// Array of predefined Y values
 		int[] particleY = new int[yRange];
-		for (int i = 0; i < yRange; i++) {
-			particleY[i] = i + 2; // array of predefined Y values
-		}
+		for (int i = 0; i < yRange; i++)
+			particleY[i] = i + 2;
+		
 
-		/* generate particle with its trail */
-		for (int i = 0; i < initialAmount; i++) {
+		// Generate particle with its trail
+		for (int i = 0; i < initialAmount; i++)
+		{
 			final int x = random.nextInt(xRange) + 10;
 			final int y = particleY[random.nextInt(yRange)];
 			final double alpha = 0.1 + 0.70 * random.nextDouble();
@@ -549,7 +556,7 @@ public class Utils {
 			root.getChildren().add(p);
 		}
 
-		/* animating particles */
+		// Animating particles
 		return new AnimationTimer()
 		{
 			private long particle_create = 0;
@@ -577,7 +584,7 @@ public class Utils {
 
 	}
 
-	/* Get random distance based on alpha */
+	// Get random distance based on alpha
 	private static int getRandomDistance(double alpha)
 	{
 		if (alpha <= 0.45) return 1;

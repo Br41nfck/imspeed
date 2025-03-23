@@ -7,7 +7,8 @@ Constants for all used colors
 _C indicates a Color object
 */
 
-public interface Colors {
+public interface Colors
+{
 	public static final String BACKGROUND = "#0E0E0E";
 	public static final String RED = "#FF554D";
 	public static final String ORANGE = "#FCA103";

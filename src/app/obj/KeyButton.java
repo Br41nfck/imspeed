@@ -98,7 +98,8 @@ public class KeyButton extends StackPane
 					callback.callback(root, active);
 					active = !active;
 				}
-			} else e.consume();
+			}
+			else e.consume();
 		});
 	}
 

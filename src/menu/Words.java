@@ -19,11 +19,13 @@ public class Words
 	static File[] listOfFiles;
 	public static int how_many_lngs;
 
+	// Difficulties
 	public static String[] loadDifficulties()
 	{
 		return new String[] { "Easy", "Normal", "Hard", "HARDCORE!!!", "Custom" };
 	}
 
+	// Find Languages Files
 	public static String[][] loadLanguages()
 	{
 		String path = new File("").getAbsolutePath() + "/words/";
@@ -42,12 +44,12 @@ public class Words
 
 			for (int i = 0; i < how_many_lngs; i++)
 			{
-				try (BufferedReader b = new BufferedReader(new FileReader(path + listOfFiles[i].getName()))) 
+				try (BufferedReader b = new BufferedReader(new FileReader(path + listOfFiles[i].getName())))
 				{
 					String s = b.readLine();
 					lngsNames.add(s);
 					// If selected add "x" in box else empty box
-					lngs[i][0] = Select.selected_lng_files.contains(listOfFiles[i]) ? "[ x ]" : "[   ]"; 
+					lngs[i][0] = Select.selected_lng_files.contains(listOfFiles[i]) ? "[x]" : "[ ]";
 					// Add language name from file's first line
 					lngs[i][1] = s;
 
@@ -62,6 +64,7 @@ public class Words
 		else return null;
 	}
 
+	// Load selected words to game
 	public static List<String> loadWords(List<File> selected)
 	{
 		List<String> allWords = new ArrayList<String>();

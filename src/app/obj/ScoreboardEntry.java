@@ -13,12 +13,13 @@ import javafx.scene.text.Font;
 
 public class ScoreboardEntry extends StackPane
 {
-
-	public static boolean colorSwitch = false; // flag for changing color
-	public static ScoreboardEntry activeEntry = null; // storing active entry object
+	// Flag for changing color
+	public static boolean colorSwitch = false;
+	// Storing active entry object
+	public static ScoreboardEntry activeEntry = null;
 	public static ScoreboardEntry toDeleteEntry = null;
-	/* storing widths of scoreboard columns + index (first one) */
-	final static int COL_WIDTHS[] = {40, 100, 60, 90, 100, 90, 130, 140}; 
+	// Storing widths of scoreboard columns + index (first one)
+	final static int COL_WIDTHS[] = {40, 100, 60, 90, 100, 90, 130, 140};
 	final private boolean header;
 	private boolean active;
 	final private String date;
@@ -28,8 +29,8 @@ public class ScoreboardEntry extends StackPane
 			+ "-fx-padding: 0 10 0 0;"
 			+ "-fx-border-style: hidden solid hidden hidden;";
 
-	/* constructor for table headers */
-	public ScoreboardEntry(int y, String... headers) 
+	// Constructor for table headers
+	public ScoreboardEntry(int y, String... headers)
 	{
 		this(y, 0, false, null, headers);
 	}
@@ -40,21 +41,25 @@ public class ScoreboardEntry extends StackPane
 		this.date = date;
 		this.nr = nr;
 		this.header = nr == 0;
+		// Set size
+		setPrefSize(750, 22);
+		// Set Y
+		setTranslateY(y);
+		setAlignment(Pos.CENTER_LEFT);
+		// List of all values of the entry
+		ArrayList<String> values = new ArrayList<>(Arrays.asList(valuesArr));
+		// Add dot to entry index
+		values.add(0, String.valueOf(nr) + ".");
+		// Order index of entry
+		int index = 0;
+		// X position for each value
+		int currentX = 1;
+		// Get width from declared sizes
+		for (String entry : values)
+		{
+			final int width = COL_WIDTHS[index];
 
-		setPrefSize(750, 22); // set size
-		setTranslateY(y); // set Y
-		setAlignment(Pos.CENTER_LEFT); // set alignment
-
-		ArrayList<String> values = new ArrayList<>(Arrays.asList(valuesArr)); // list of all values of the entry
-		values.add(0, String.valueOf(nr) + "."); // add dot to entry index
-
-		int index = 0; // order index of entry
-		int currentX = 1; // x position for each value
-
-		for (String entry : values) {
-			final int width = COL_WIDTHS[index]; // get width from declated sizes
-
-			/* create label */
+			// Create label
 			Label l = new Label(entry);
 			l.setPrefHeight(22);
 			l.setMaxWidth(width);
@@ -65,64 +70,66 @@ public class ScoreboardEntry extends StackPane
 
 			baseColor = (colorSwitch ? Colors.MID_GREY : Colors.DARK_GREY);
 
-			/* add style to it */
+			// Add style to it
 			String style = baseStyle + "-fx-background-color: " + baseColor + ";"; // switching grey colors for rows
 
-			/* set different colors for active entry */
-			if (active) 
+			// Set different colors for active entry
+			if (active)
 			{
 				style += "-fx-background-color: #00AAAA;";
 				l.setTextFill(Color.web("#ECF95B"));
 			}
 
 			if (index == 0)
-				style += "-fx-padding: 0 5 0 0;"; // different padding for index value
+			// Different padding for index value
+				style += "-fx-padding: 0 5 0 0;";
 			if (index == values.size() - 1)
-				// hide border of the last value to not overlap with container border
-				style += "-fx-border-style: hidden;"; 
+				// Hide border of the last value to not overlap with container border
+				style += "-fx-border-style: hidden;";
 
-			/* headers row styling */
-			if (nr == 0) 
+			// Headers row styling
+			if (nr == 0)
 			{
 				if (index == 0) l.setText("#");
-				
 				style += "-fx-font-weight: bold;"
 						+ "-fx-background-color: #FFF;"
 						+ "-fx-padding: 0;";
 				l.setTextFill(Color.BLACK);
 				l.setAlignment(Pos.CENTER);
 			}
-
-			l.setStyle(style); // apply all styles
-			currentX += width; // shift X for next column
-			index++; // increase index
-
-			getChildren().add(l); // add to stackPane
+			// Apply all styles
+			l.setStyle(style);
+			// Shift X for next column
+			currentX += width;
+			index++;
+			// Add to stackPane
+			getChildren().add(l);
 		}
 
-		/* save active entry */
-		if (active) 
+		// Save active entry
+		if (active)
 		{
 			if (activeEntry == null) activeEntry = this;
-			else 
+			else
 			{
 				ScoreboardEntry entryToDisable = null;
 				
-				if (activeEntry.getDateNum() < this.getDateNum()) 
+				if (activeEntry.getDateNum() < this.getDateNum())
 				{
 					entryToDisable = activeEntry;
 					activeEntry = this;
-				} 
+				}
 				else entryToDisable = this;
 				
 				setInactive(entryToDisable);
 				entryToDisable.active = false;
 			}
 		}
-		colorSwitch = (nr % 15 == 0) ? false : !colorSwitch; // reset color switching for each page
+		// Reset color switching for each page
+		colorSwitch = (nr % 15 == 0) ? false : !colorSwitch;
 	}
 
-	private void setInactive(ScoreboardEntry entry) 
+	private void setInactive(ScoreboardEntry entry)
 	{
 		entry.getNameLabel().setText("- unfinished -");
 		entry.getChildren().forEach(child -> {
@@ -138,56 +145,56 @@ public class ScoreboardEntry extends StackPane
 		});
 	}
 
-	public void setToDelete(boolean toDelete) 
+	public void setToDelete(boolean toDelete)
 	{
-		if (toDelete) 
+		if (toDelete)
 		{
 			toDeleteEntry = this;
 			getChildren().forEach(e -> e.setStyle(e.getStyle() + "-fx-background-color: #fc3908;-fx-border-color: #EBB796;"));
-		} 
+		}
 		else getChildren().forEach(e -> e.setStyle(e.getStyle().replace("-fx-background-color: #fc3908;-fx-border-color: #EBB796;", "")));
 	}
 
-	public long getDateNum() 
+	public long getDateNum()
 	{
 		return Long.valueOf(date);
 	}
 
-	public boolean isHeader() 
+	public boolean isHeader()
 	{
 		return header;
 	}
 
-	/* returns page where entry is */
-	public int getEntryPage() 
+	// Returns page where entry is
+	public int getEntryPage()
 	{
 		return (int) Math.ceil(this.nr / 15.0);
 	}
 
-	public String getName() 
+	public String getName()
 	{
 		return getNameLabel().getText();
 	}
 
-	/* sets visible name value */
-	public void setName(String name) 
+	// Sets visible name value
+	public void setName(String name)
 	{
 		getNameLabel().setText(name);
 	}
 
-	/* returns numeral date */
-	public String getDate() 
+	// Returns numeral date
+	public String getDate()
 	{
 		return date;
 	}
 
-	/* returns information if entry is active */
-	public boolean isActive() 
+	// Returns information if entry is active
+	public boolean isActive()
 	{
 		return active;
 	}
 
-	private Label getNameLabel() 
+	private Label getNameLabel()
 	{
 		return (Label) getChildren().get(getChildren().size() - 1);
 	}

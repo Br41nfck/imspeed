@@ -14,6 +14,7 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TextFormatter;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
@@ -27,22 +28,25 @@ import menu.Words;
 import menu.obj.Option;
 import menu.obj.ScaleBox;
 
-public class Scenes 
+public class Scenes
 {
+	// Variables
 	public final static String FONT_TITLE = "Grixel Kyrou 7 Wide Bold";
-	public final static String FONT_TEXT = "Courier 14 new";
+	public final static String FONT_TEXT = "Courier 20 new";
 
-	static Text pointsVal = new Text("0");
-	static Text conditionVal = new Text(); // create empty text and assign value later based on game mode
-	static Text CPM = new Text("0");
+	static Text pointsVal = new Text("");
+	// Create empty text and assign value later based on game mode
+	static Text conditionVal = new Text();
+	static Text CPM = new Text("");
 	static final StackPane pauseBox = new StackPane();
 	public static final TextField input = new TextField();
+	
 	public static final Text pointer = createText(">", Color.WHITE, FONT_TEXT, 15);
+	
 	public static final Option[] game_modes =
 	{
 		new Option(250, "Normal", 40, true),
-		new Option(290, "Marathon", 40, false),
-		new Option(330, "Exit", 40, false)
+		new Option(290, "Marathon", 40, false)
 	};
 
 	public static ScaleBox[][] scales;
@@ -74,7 +78,7 @@ public class Scenes
 	private static boolean deletable = false;
 	static boolean saved;
 
-	/* fallback for default call, if called from main menu 'saved' is set as true */
+	// Fallback for default call, if called from main menu 'saved' is set as true
 	public static Scene scoreboard()
 	{
 		return scoreboard(false);
@@ -82,25 +86,25 @@ public class Scenes
 
 	public static Scene scoreboard(boolean _saved)
 	{
-
-		boolean newScore = false; // flag for asking for user's name
+		// Flag for asking for user's name
+		boolean newScore = false;
 		saved = _saved;
 
 		Pane root = new Pane();
 		root.setPrefSize(800, 500);
 		root.setStyle("-fx-background-color: #0E0E0E");
 
-		/* text with error information when SQLException occurs */
+		// Text with error information when SQLException occurs
 		Text errorMsg = createText("Could not get any scores", Colors.RED_C, FONT_TEXT, 15);
 		errorMsg.setTranslateX(292);
 		errorMsg.setTranslateY(80);
 		errorMsg.setVisible(false);
 
-		/* title text */
+		// Title text
 		Text title = createText("SCOREBOARD", Color.WHITE, FONT_TITLE, 26);
 		title.setTranslateX(257);
 
-		/* stackpane with input box asking for name */
+		// Stack pane with input box asking for name
 		Node[] nameInputRes = Utils.inputBox("NAME");
 		StackPane nameInput = (StackPane) nameInputRes[0];
 		nameInput.setTranslateX((800 - nameInput.getPrefWidth()) / 2);
@@ -145,14 +149,13 @@ public class Scenes
 			}
 		}
 
-		/* create 1st entry as table headers */
+		// Create 1st entry as table headers
 		final ScoreboardEntry headers = new ScoreboardEntry(1, columnsKeys);
 		resultsContainer.getChildren().add(headers);
 		
-		/* show error message */
+		// Show error message
 		if (entries.size() == 0) errorMsg.setVisible(true);
 		
-
 		final ScoreboardEntry activeEntry = ScoreboardEntry.activeEntry;
 		final int pages = (int) Math.ceil(entries.size() / 15.0);
 
@@ -166,7 +169,7 @@ public class Scenes
 		showScoreboardPage(currentPage, resultsContainer, entries, pageNumber);
 
 		root.getChildren().addAll(resultsContainer, title, errorMsg, pageStack, newScoreText, nameInput);
-		// store information if there is new score, so it can be accessed inside lambda
+		// Store information if there is new score, so it can be accessed inside lambda
 		root.setId(String.valueOf(newScore));
 
 		Scene scene = new Scene(root);
@@ -195,7 +198,8 @@ public class Scenes
 						sortText.setText("SORT BY: " + column);
 					}
 				});
-
+		
+		
 		KeyButton deleteButton = new KeyButton(scene, root, KeyCode.DELETE, "DEL", 25, 472, 50, 20, 14, 8,
 				new ButtonAction()
 				{
@@ -216,7 +220,7 @@ public class Scenes
 		root.getChildren().addAll(sortButton, sortText);
 		root.getChildren().addAll(deleteButton, deleteText);
 
-		/* animation timer with floating particles */
+		// Animation timer with floating particles
 		AnimationTimer animation_bg = Utils.getBackgroundTimer(790, 590, root, resultsContainer, newScoreText,
 				nameInput, sortButton, sortText);
 		animation_bg.start();
@@ -224,7 +228,7 @@ public class Scenes
 		scene.setOnKeyPressed(e -> {
 			switch (e.getCode())
 			{
-				/* show next page if possible */
+				// Show next page if possible
 				case DOWN:
 					if (deletable)
 						if (++toDeleteIndex == entries.size()) toDeleteIndex = 0;
@@ -242,14 +246,14 @@ public class Scenes
 						showScoreboardPage(++currentPage, resultsContainer, entries, pageNumber);
 					break;
 
-				/* show previous page if possible */
+				// Show previous page if possible
 				case LEFT:
 					if (currentPage - 1 >= 1)
 						showScoreboardPage(--currentPage, resultsContainer, entries, pageNumber);
 					break;
 
 				case ESCAPE:
-					/* if input prompt is active, close it */
+					// If input prompt is active, close it
 					if (deletable)
 					{
 						deletable = false;
@@ -266,10 +270,10 @@ public class Scenes
 						}
 						else
 						{
-							/* else check if record should be removed */
+							// Else check if record should be removed
 							if (Boolean.valueOf(root.getId()))
 								Utils.removeRecord(ScoreboardEntry.activeEntry.getDate());
-							/* and return to selection scene */
+							// And return to selection scene
 							ScoreboardEntry.activeEntry = null;
 							Select.selectGamemode();
 						}
@@ -277,31 +281,36 @@ public class Scenes
 					break;
 
 				case ENTER:
-					/* if there is a new score */
+					// If there is a new score
 					if (Boolean.valueOf(root.getId()))
 					{
-						newScoreTimer.stop(); // stop new score animation
-						newScoreText.setVisible(false); // and hide it
-						nameInput.setVisible(true); // show name prompt
-						root.setId("false"); // update flag about new score
+						// Stop new score animation and hide it
+						newScoreTimer.stop();
+						newScoreText.setVisible(false);
+						// Show name prompt
+						nameInput.setVisible(true);
+						// Update flag about new score
+						root.setId("false");
 					}
-					// if prompt is active and is not empty save the name
+					// If prompt is active and is not empty save the name
 					else if (nameInput.isVisible() && input.getText().trim().length() > 0)
 					{
 						final String name = input.getText();
 						if (Utils.setScoreName(name, activeEntry.getDate()))
 						{
-							ScoreboardEntry.activeEntry.setName(name); // update visible user's name
+							// Update visible user's name
+							ScoreboardEntry.activeEntry.setName(name);
 							saved = true;
 							deleteText.setText("DELETE");
 						}
 						else
 						{
-							/* if error occurs display information */
+							// If error occurs display information
 							errorMsg.setText("Could not save name");
 							errorMsg.setVisible(true);
 						}
-						nameInput.setVisible(false); // hide name prompt
+						// Hide name prompt
+						nameInput.setVisible(false);
 					}
 
 					else if (deletable)
@@ -319,7 +328,7 @@ public class Scenes
 				default:
 					break;
 			}
-			/* hide/show navigation arrows */
+			// Hide/show navigation arrows
 			pagePrev.setVisible(currentPage != 1);
 			pageNext.setVisible(currentPage != pages);
 		});
@@ -334,6 +343,8 @@ public class Scenes
 		showScoreboardPage(currentPage, resultsContainer, entries, pageNumber);
 	}
 
+
+	// Select Menu
 	public static Pane selectMenu(String type)
 	{
 		Pane root = new Pane();
@@ -355,7 +366,7 @@ public class Scenes
 			case "DIFFICULTY":
 				for (int i = 0; i < 5; i++)
 				{
-				// list all difficulties with one empty line for 'Custom'
+				// List all difficulties with one empty line for 'Custom'
 				difficulties[i] = new Option((i == 4) ? 345 : 220 + 25 * i, loadedDifficulties[i], i == 0);
 				}
 				root.getChildren().addAll(difficulties);
@@ -397,7 +408,7 @@ public class Scenes
 					{
 						int x = j * 17;
 						int y = i * 30;
-						scales[i][j] = new ScaleBox(x, y); //
+						scales[i][j] = new ScaleBox(x, y);
 						sPaneScales.getChildren().add(scales[i][j]);
 					}
 				}
@@ -408,22 +419,24 @@ public class Scenes
 
 			case "LANGUAGES":
 				String[][] loadedLanguages = Words.loadLanguages();
-				// needs to be defined here because before 'Words.loadLanguages()' is called 'how_many_lngs' will be 0
+				// Needs to be defined here because before 'Words.loadLanguages()' is called 'how_many_lngs' will be 0
 				lngs = new Option[Words.how_many_lngs];
 
-				/* load all available languages */
+				// Load all available languages
 				for (int i = 0; i < Words.how_many_lngs; i++)
 					lngs[i] = new Option(220 + 25 * i, loadedLanguages[i][0], loadedLanguages[i][1], i == 0);
 			
 				root.getChildren().addAll(lngs);
 				break;
 		}
-		return root; // return pane with selected elements
+		// Return pane with selected elements
+		return root;
 	}
 
 	public static Pane gameOver()
 	{
 
+		// Background
 		Pane root = new Pane();
 		root.setPrefSize(800, 500);
 		root.setStyle("-fx-background: " + Colors.BACKGROUND);
@@ -436,8 +449,8 @@ public class Scenes
 		background.setTranslateY(0);
 		background.setFill(Colors.BACKGROUND_C);
 
-		int pointsLen = String.valueOf(Math.round(Window.points)).length(); // calculation needed for good placement of
-																			// the points
+		// Calculation needed for good placement of the points
+		int pointsLen = String.valueOf(Math.round(Window.points)).length();
 		Text pointsText = new Text("Your score: ");
 		pointsText.setFont(Font.font(FONT_TITLE, 30));
 		pointsText.setFill(Color.WHITE);
@@ -454,7 +467,8 @@ public class Scenes
 		return root;
 	}
 
-	public static Pane game() {
+	public static Pane game()
+	{
 
 		Pane root = new Pane();
 		root.setPrefSize(800, 500);
@@ -479,7 +493,7 @@ public class Scenes
 		pointsVal.setFill(Colors.GREEN_C);
 		pointsVal.setTranslateX(50 + 10 * pointsLen);
 		pointsVal.setFont(Font.font(FONT_TEXT, 17));
-		// if default gamemode, set "Missed" else "Time left" for marathon mode
+		// If default game mode, set "Missed" else "Time left" for marathon mode
 		Text conditionText = new Text(Window.gameMode == 0 ? "Missed: " : "Time left: ");
 		conditionText.setFill(Color.WHITE);
 		conditionText.setTranslateX(230);
@@ -498,16 +512,20 @@ public class Scenes
 		CPM.setTranslateX(280);
 		CPM.setFont(Font.font(FONT_TEXT, 17));
 
-		Text signL = new Text("[");
+
+		// Change "User Input" form
+		Text signL = new Text("|");
 		signL.setFill(Color.WHITE);
 		signL.setTranslateX(27);
 		signL.setFont(Font.font(FONT_TEXT, 17));
 
-		Text signR = new Text("]");
+		Text signR = new Text("|");
 		signR.setFill(Color.WHITE);
-		signR.setTranslateX(27 + 120 + 5);
+		signR.setTranslateX(200); // 27 + 120 + 5 = 152
 		signR.setFont(Font.font(FONT_TEXT, 17));
 
+
+		// "PAUSE" block
 		Text pause = new Text("PAUSE");
 		pause.setFill(Colors.RED_C);
 		pause.setFont(Font.font(FONT_TEXT, 25));
@@ -520,12 +538,14 @@ public class Scenes
 		pauseBox.setTranslateY(200);
 		pauseBox.setVisible(false);
 
+		// Input Form
 		input.setPrefWidth(120);
 		input.setPrefHeight(20);
 		input.setMaxWidth(120);
 		input.setMaxHeight(20);
 		input.setTranslateX(35);
-		input.setStyle("-fx-faint-focus-color: transparent;"
+		input.setStyle(
+				"-fx-faint-focus-color: transparent;"
 				+ "-fx-focus-color: transparent;"
 				+ "-fx-text-box-border: transparent;"
 				+ "-fx-background-color: #0e0e0e;"
@@ -533,13 +553,26 @@ public class Scenes
 				+ "-fx-highlight-fill: #FFF;"
 				+ "-fx-highlight-text-fill: #000;"
 				+ "-fx-cursor: block;"
-				+ "-fx-font-family: 'Courier new', monospace;");
-		input.setOnKeyTyped(e -> {
+				// Font for "User Form"
+				+ "-fx-font-family: 'Courier new', monospace;"
+				+ "-fx-font-size: 16px;"
+					);
+		
+		input.setOnKeyTyped(e -> 
+			{
 			final int maxCharacters = 30;
-			if (input.getText().length() > maxCharacters) {
-				e.consume();
+			if (input.getText().length() > maxCharacters) e.consume();
 			}
-		});
+							);
+		
+		// Remove extra space in "User Input" form
+		input.setTextFormatter(new TextFormatter<>(change -> 
+		{
+		    if (change.getText().equals(" ")) change.setText("");
+		    return change;
+		}
+												));
+
 
 		StackPane topStack = new StackPane();
 		topStack.setTranslateX(0);
@@ -563,8 +596,8 @@ public class Scenes
 		return root;
 	}
 
-	public static StackPane error(String err) {
-
+	public static StackPane error(String err)
+	{
 		StackPane root = new StackPane();
 		root.setPrefSize(800, 500);
 		root.setStyle("-fx-background-color: rgb(14, 14, 14)");
@@ -590,11 +623,11 @@ public class Scenes
 			case "MISSING_WORDS":
 				errorMsg.setText("Missing folder with words");
 				break;
-
+/*
 			case "TEST":
 				errorMsg.setText("LONG TEST TEXT TO SEE HOW IT WRAPS");
 				break;
-
+*/
 		}
 		root.getChildren().addAll(errorBox, errorMsg, error);
 		return root;
@@ -602,7 +635,7 @@ public class Scenes
 
 	public static void fontSetup()
 	{
-		/* list of required font names */
+		// List of required font names
 		String[] fontNames =
 		{
 				"Grixel Kyrou 7 Wide Bold.ttf",
@@ -610,13 +643,14 @@ public class Scenes
 				"Courier New Bold.ttf"
 		};
 
-		/* load each font */
+		// Load each font
 		for (String font : fontNames)
 		{
 			try
 			{
 				Font.loadFont(Scenes.class.getResourceAsStream("/resources/fonts/" + font), 20);
-			} catch (Exception e)
+			} 
+			catch (Exception e)
 			{
 				Log.error(String.format("Unable to load font {%s}: {%s}", font, e));
 			}

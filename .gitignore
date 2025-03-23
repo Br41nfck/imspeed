@@ -1,2 +1,11 @@
+.config/
+.git/
+.settings/
+.vscode/
 build/
-.config/confix.xml
+doc/
+target/
+.classpath
+.project
+pom.xml
+README.md

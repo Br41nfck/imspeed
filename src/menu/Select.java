@@ -22,17 +22,17 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import menu.obj.Option;
 
-public class Select {
-
+public class Select
+{
 	public static final List<File> selected_lng_files = new ArrayList<File>();
 	public static final List<String> selected_lng_names = new ArrayList<String>();
 
-	public static int[] x = { 4, 4, 4, 4 };
+	public static int[] x = {4, 4, 4, 4};
 
 	private static int row;
 	private static int how_many_lngs;
 
-	public static void selectGamemode() 
+	public static void selectGamemode()
 	{
 		row = 0;
 		setHighlight(Scenes.game_modes);
@@ -43,7 +43,7 @@ public class Select {
 		window.setScene(scene);
 
 		scene.setOnKeyPressed(e -> {
-			switch (e.getCode()) 
+			switch (e.getCode())
 			{
 				case UP:
 					row = (row > 0) ? row - 1 : 1;
@@ -66,32 +66,55 @@ public class Select {
 			}
 		});
 
+		// Scoreboard on Form Label
 		Text showScoreboardText = Utils.createText("SCOREBOARD", Color.WHITE, Scenes.FONT_TEXT, 14);
 		showScoreboardText.setTranslateX(70);
 		showScoreboardText.setTranslateY(470);
-
+		
+		// Bind key
 		KeyButton showScoreboard = new KeyButton(scene, root, KeyCode.S, "S", 20, 450, 30, 30, 14, 8, true,
-				new ButtonAction() 
+				new ButtonAction()
 		{
 					@Override
-					public void callback(Pane root, boolean active) 
+					public void callback(Pane root, boolean active)
 					{
 						window.setScene(Scenes.scoreboard(true));
 					}
 		});
+		
+		// "Exit Game" Label
+		Text exitGameText = Utils.createText("EXIT", Color.WHITE, Scenes.FONT_TEXT, 14);
+		exitGameText.setTranslateX(470); // 70 + 400
+		exitGameText.setTranslateY(470); // 470
+
+		// Bind key
+		KeyButton exitgame = new KeyButton(scene, root, KeyCode.Q, "Q", 420, 450, 30, 30, 14, 8, true,
+				new ButtonAction()
+				{
+			@Override
+		    public void callback(Pane root, boolean active)
+			{
+				System.out.println("Exit program: status code - 0");
+		        System.exit(0);
+			}
+		});
+		
+		
+		
 
 		root.getChildren().addAll(showScoreboardText, showScoreboard);
+		root.getChildren().addAll(exitGameText, exitgame);
 	}
 
-	/* set difficulty */
-	public static void selectDifficulty() 
+	// Set difficulty
+	public static void selectDifficulty()
 	{
 		row = 0;
 		Pane root = Scenes.selectMenu("DIFFICULTY");
 		Scene scene = new Scene(root);
 		window.setScene(scene);
 		scene.setOnKeyPressed(e -> {
-			switch (e.getCode()) 
+			switch (e.getCode())
 			{
 				case UP:
 					row = (row > 0) ? row - 1 : 4;
@@ -106,7 +129,7 @@ public class Select {
 				case ENTER:
 					Window.gameDifficulty = row + 1;
 					if (row == 4) customDifficulty(false);
-					 else 
+					else
 					{
 						Log.success("Difficulty: " + Scenes.loadedDifficulties[row]);
 						selectLanguage(false);
@@ -123,8 +146,8 @@ public class Select {
 		});
 	}
 
-	/* custom difficulty selection */
-	private static void customDifficulty(boolean infinite) 
+	// Custom difficulty selection
+	private static void customDifficulty(boolean infinite)
 	{
 
 		row = 0;
@@ -134,21 +157,20 @@ public class Select {
 		Scene scene = new Scene(root);
 
 		int amount = Window.gameMode == 0 ? 3 : 4;
-		for (int i = 0; i < amount; i++) 
-			for (int j = 0; j <= x[i]; j++) 
+		for (int i = 0; i < amount; i++)
+			for (int j = 0; j <= x[i]; j++)
 				Scenes.scales[i][j].setFilled(true);
 			
 		window.setScene(scene);
 
 		scene.setOnKeyPressed(e -> {
-
 			double arrowY = Scenes.pointer.getTranslateY();
 
-			switch (e.getCode()) 
+			switch (e.getCode())
 			{
 				case UP:
 					if (row-- > 0) Scenes.pointer.setTranslateY(arrowY - 30);
-					else 
+					else
 					{
 						row = amount - 1;
 						Scenes.pointer.setTranslateY(arrowY + (amount - 1) * 30);
@@ -201,7 +223,7 @@ public class Select {
 		});
 	}
 
-	private static void parseCustom(int howFast, int howOften, int howMany, int timeLeft) 
+	private static void parseCustom(int howFast, int howOften, int howMany, int timeLeft)
 	{
 		Window.howMany = howMany;
 		Window.howFast = 1_650_000_000 - 150_000_000 * howFast;
@@ -210,10 +232,10 @@ public class Select {
 		Window.timeLeft = 5 * timeLeft;
 	}
 
-	/* select languages */
+	// Select languages
 	private static void selectLanguage(boolean custom)
 	{
-		// reset stuff
+		// Reset stuff
 		selected_lng_files.clear();
 		selected_lng_names.clear();
 		row = 0;
@@ -228,12 +250,12 @@ public class Select {
 		Scene scene = new Scene(root);
 
 		window.setScene(scene);
-		/* redefine variable to avoid `0` */
-		how_many_lngs = Words.how_many_lngs; 
+		// Redefine variable to avoid `0`
+		how_many_lngs = Words.how_many_lngs;
 
-		/* menu movement key listener */
+		// Menu movement key listener
 		scene.setOnKeyPressed(e -> {
-			switch (e.getCode()) 
+			switch (e.getCode())
 			{
 				case UP:
 					row = (row > 0) ? row - 1 : how_many_lngs - 1;
@@ -246,15 +268,15 @@ public class Select {
 					break;
 
 				case SPACE:
-					if (selected_lng_files.contains(Words.listOfFiles[row])) 
+					if (selected_lng_files.contains(Words.listOfFiles[row]))
 					{
 						selected_lng_files.remove(Words.listOfFiles[row]);
 						selected_lng_names.remove(Words.lngsNames.get(row));
-					} 
+					}
 					else if (!isEmpty(row))
 					{
-							selected_lng_names.add(Words.lngsNames.get(row));
-							selected_lng_files.add(Words.listOfFiles[row]);
+						selected_lng_names.add(Words.lngsNames.get(row));
+						selected_lng_files.add(Words.listOfFiles[row]);
 					}
 					setCheck();
 					break;
@@ -262,14 +284,14 @@ public class Select {
 				case ENTER:
 					if (!selected_lng_files.contains(Words.listOfFiles[row]) && selected_lng_files.size() == 0)
 					{
-						if (!isEmpty(row)) 
+						if (!isEmpty(row))
 						{
 							selected_lng_names.add(Words.lngsNames.get(row));
 							selected_lng_files.add(Words.listOfFiles[row]);
 						}
 					}
 					
-					if (!Words.loadWords(selected_lng_files).isEmpty()) 
+					if (!Words.loadWords(selected_lng_files).isEmpty())
 					{
 						String lngs = "";
 						for (String s : selected_lng_names) lngs += "{" + s + "} ";
@@ -279,11 +301,11 @@ public class Select {
 					break;
 
 				case ESCAPE:
-					if (custom) 
+					if (custom)
 						customDifficulty(Window.infinite);
-					 else
-						 selectDifficulty();
-					
+					else
+						selectDifficulty();
+
 					break;
 				default:
 					break;

@@ -15,8 +15,9 @@ public class Word extends Text
 		setTranslateX(x);
 		setTranslateY(y);
 		setFill(Color.WHITE);
-		/* for some reason 'm' bugs when bigger size is set? */
-		setFont(Font.font("Courier New", 18));
+		// FIXME For some reason 'm' bugs when bigger size is set?
+		// Size  words on screen
+		setFont(Font.font("Courier New", 20));
 	}
 
 	public void setColor(String color)

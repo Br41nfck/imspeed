@@ -25,7 +25,7 @@ public class Log
 		System.out.println(getTime() + " [!] " + w);
 	}
 
-	/* returns the Class and Method that threw the error */
+	// Returns the Class and Method that threw the error
 	private static String getCallerLog(String log)
 	{
 		String[] callerClassSplit = Thread.currentThread().getStackTrace()[3].getClassName().split("\\.");
@@ -34,7 +34,7 @@ public class Log
 		return String.format("@%s.%s(): %s", callerClass, callerMethod, log);
 	}
 
-	/* returns current time, the • symbol (\u2022) may not be displayed properly in Windows CMD */
+	// Returns current time, the • symbol (\u2022) may not be displayed properly in Windows CMD
 	private static String getTime()
 	{
 		return String.format("[%s] \u2022", DateTimeFormatter.ofPattern("HH:mm:ss").format(LocalDateTime.now()));

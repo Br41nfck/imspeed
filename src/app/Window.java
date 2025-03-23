@@ -33,13 +33,13 @@ public class Window extends Application
 	public static List<Integer> xVal, yVal;
 
 	static double points;
-	// list of all registered CPMs [for average calculating]
+	// List of all registered CPMs [for average calculating]
 	static final List<Integer> CPMs = new ArrayList<Integer>();
-	// average CPM (for saving)
+	// Average CPM (for saving)
 	static int avgCPM;
 	static double totalSeconds;
 
-	private static AnimationTimer animation_words, animation_background, animation_gameover, animation_curtain, game_timer;
+	private static AnimationTimer animation_words, animation_background, animation_game_over, animation_curtain, game_timer;
 	private static boolean curtain, pause = false;
 	private static int typedWords, typedChars, maxWordLen = 0;
 	private static double multiplier;
@@ -67,7 +67,7 @@ public class Window extends Application
 		window.setResizable(false);
 		window.show();
 
-		/* if user didn't confirm the score remove it from scoreboard file */
+		// If user didn't confirm, the score remove it from score board file
 		window.setOnCloseRequest(e ->
 		{
 			Log.success("Exiting...");
@@ -98,13 +98,14 @@ public class Window extends Application
 
 	public static void curtain(Scene scene, Pane root)
 	{
-		game_timer.stop(); // stop the CPM timer
+		 // Stop the CPM timer
+		game_timer.stop();
 		curtain = true;
 		Rectangle cover = new Rectangle(800, 500, Colors.BACKGROUND_C);
 		cover.setVisible(false);
 		root.getChildren().add(cover);
 		List<CurtainBlock> blocks = new ArrayList<>();
-		/* generate 10 curtain blocks for each site */
+		// Generate 10 curtain blocks for each site
 		for (int i = 0; i < 10; i++)
 		{
 			CurtainBlock left_block = new CurtainBlock(i * 50, Math.log(20 - Math.abs(4.5 - i)) * 13, "L");
@@ -152,12 +153,11 @@ public class Window extends Application
 		animation_curtain.start();
 	}
 
-	/* fallback function */
+	// Fallback function
 	public static void gameOver()
 	{
 		gameOver(false);
 	}
-
 
 	public static void gameOver(boolean closed)
 	{
@@ -168,8 +168,7 @@ public class Window extends Application
 		}
 		else avgCPM = 0;
 	
-
-		/* dont log on close */
+		// Don't log on close
 		if (!closed)
 		{
 			System.out.println();
@@ -180,6 +179,7 @@ public class Window extends Application
 
 		if (points > 0) Utils.saveScore(Scenes.pointsVal.getText());
 		
+		// Show "Game Over" screen
 		Pane root = Scenes.gameOver();
 		root.setPrefSize(800, 500);
 
@@ -187,7 +187,7 @@ public class Window extends Application
 		retry.setFill(Color.WHITE);
 		retry.setTranslateX(308);
 		retry.setTranslateY(370);
-		retry.setFont(Font.font("Courier new", 14));
+		retry.setFont(Font.font("Courier new", 20));
 
 		root.getChildren().add(retry);
 		root.setOpacity(0);
@@ -198,25 +198,26 @@ public class Window extends Application
 		window.setScene(scene);
 		Utils.fadeIn(root, 300);
 
-		animation_gameover = blinkingNodeTimer(retry);
-		animation_gameover.start();
+		animation_game_over = blinkingNodeTimer(retry);
+		animation_game_over.start();
 
 		scene.addEventFilter(KeyEvent.KEY_PRESSED, (KeyEvent e) -> {
 			if (e.getCode() == KeyCode.SPACE)
 			{
-				animation_gameover.stop();
+				animation_game_over.stop();
 				System.out.println();
 				window.setScene(Scenes.scoreboard());
 			}
 			e.consume();
-		});};
+		});
+	};
 	
 	public static void startGame(List<File> selected)
 	{
 		Pane root = Scenes.game();
 		Scene scene = new Scene(root);
 
-		/* RESET EVERYTHING */
+		// RESET EVERYTHING
 		curtain = false;
 		typedWords = 0;
 		typedChars = 0;
@@ -226,36 +227,40 @@ public class Window extends Application
 
 		Scenes.CPM.setText("0");
 		Scenes.pointsVal.setText("0");
+		// List of all word-strings combined
+		List<String> strings = Words.loadWords(selected);
+		// List of active words
+		List<Word> words = new ArrayList<Word>();
+		// List of new words [for placement optimization]
+		List<Word> fresh = new ArrayList<Word>();
 
-		List<String> strings = Words.loadWords(selected); // list of all word-strings combined
-		List<Word> words = new ArrayList<Word>(); // list of active words
-		List<Word> fresh = new ArrayList<Word>(); // list of new words [for placement optimization]
-
-		// get longest word's length
+		// Get longest word's length
 		for (String s : strings)
 			if (s.length() > maxWordLen) maxWordLen = s.length();
-		
-		maxWordLen *= 9; // multiply by pixels of 1 letter with space
+		// Multiply by pixels of 1 letter with space
+		maxWordLen *= 9;
 
-		// list for predefined x & y coordinates
+		// List for predefined x & y coordinates
 		final List<Integer> xVal_final = new ArrayList<Integer>();
 		final List<Integer> yVal_final = new ArrayList<Integer>();
 
-		// predefined values
+		// Predefined values
 		for (int i = -10; i < 10; i += 5)  xVal_final.add(i);
 		for (int i = 20; i < 400; i += 20) yVal_final.add(i);
 
-		// temporary sublists
+		// Temporary sub lists
 		xVal = new ArrayList<Integer>(xVal_final);
 		yVal = new ArrayList<Integer>(yVal_final);
 
-		Word first = new Word(0, 195, "type-me"); // first word
+		// First word on screen
+		Word first = new Word(0, 195, "helloworld");
 		words.add(first);
 
 		root.getChildren().add(first);
-		window.setScene(scene); // render scene
+		// Render scene
+		window.setScene(scene);
 
-		/* set difficulty variables */
+		// Set difficulty variables
 		switch (gameDifficulty)
 		{
 			case 1:
@@ -302,7 +307,7 @@ public class Window extends Application
 
 		Scenes.conditionVal.setText(Window.gameMode == 0 ? "0" : String.valueOf(timeLeft));
 
-		/* timer for calculating CPM */
+		// Timer for calculating CPM
 		game_timer = new AnimationTimer()
 		{
 			private long lastUpdate = 0;
@@ -312,7 +317,7 @@ public class Window extends Application
 			{
 				if (pause) lastUpdate = now;
 
-				/* every 1s */
+				// every 1s
 				if (now - lastUpdate >= 1_000_000_000)
 				{
 					if (gameMode == 1)
@@ -320,17 +325,18 @@ public class Window extends Application
 						Scenes.conditionVal.setText(String.valueOf(--timeLeft));
 						if (timeLeft <= 0)
 						{
-							root.getChildren().removeAll(words); // remove all objects
+							// Remove all objects
+							root.getChildren().removeAll(words);
 							curtain(scene, root);
 						}
 					}
 
-					/* calculating CPM */
+					// Calculating CPM
 					totalSeconds = (now - startTime) / 1_000_000_000l;
 					double minutes = totalSeconds / 60;
 					int calc = (int) Math.round(typedChars / minutes);
 
-					/* skip the 1st word */
+					// Skip the first word
 					if (calc > -1 && typedWords > 1)
 					{
 						CPMs.add(calc);
@@ -338,15 +344,20 @@ public class Window extends Application
 					}
 						else
 						{
-							/* ranges for color change */
+							// Ranges for color change
 							if (calc > 350)
-								Scenes.CPM.setStyle(Colors.GOLD_GRADIENT); /* >350 */
+							 	// >350
+								Scenes.CPM.setStyle(Colors.GOLD_GRADIENT);
 							else
 								Scenes.CPM.setFill(
-										(calc > 250) ? Colors.GREEN_C : /* 250-350 */
-												(calc > 200) ? Colors.YELLOW_C : /* 200-250 */
-														(calc > 150) ? Colors.ORANGE_C : /* 150-200 */
-																Colors.RED_C /* <150 */
+										// 250-350
+										(calc > 250) ? Colors.GREEN_C :
+										 		// 200-250
+												(calc > 200) ? Colors.YELLOW_C :
+														// 150-200
+														(calc > 150) ? Colors.ORANGE_C :
+																// <150
+																Colors.RED_C
 								);
 						}
 					}
@@ -354,11 +365,10 @@ public class Window extends Application
 				}
 			};
 		
-
 		animation_background = Utils.getBackgroundTimer(790, 398, root);
 		animation_background.start();
 
-		/* animating words */
+		// Animating words
 		animation_words = new AnimationTimer()
 		{
 			private long lastUpdate = 0;
@@ -371,34 +381,37 @@ public class Window extends Application
 			{
 				if (now - lastUpdate >= howFast)
 				{
-					List<Word> del = new ArrayList<Word>(); // list of words to deletion after loop
+					// List of words to deletion after loop
+					List<Word> del = new ArrayList<Word>();
 					boolean gameOver = false;
 
-					outerloop: for (Word w : words)
+					outer_loop: for (Word w : words)
 					{
 						if (curtain) break;
-						
-						w.moveForward(); // move all words forward
+						// Move all words forward
+						w.moveForward();
 						w.toFront();
 
 						double xPos = w.getTranslateX();
 						if (xPos > 805)
-						{ 	// if word leaves beyond the window
-							multiplier = 1; // reset multiplier
-							root.getChildren().remove(w); // remove word from the pane
-							del.add(w); // add word to deletion list
+						{ 	// If word leaves beyond the window, reset multiplier
+							multiplier = 1;
+							// Remove word from the pane
+							root.getChildren().remove(w);
+							// Add word to deletion list
+							del.add(w);
 
 							switch (gameMode)
 							{
 								case 0:
-									// update missed and increase strikes
+									// Update missed and increase strikes
 									Scenes.conditionVal.setText(String.valueOf(++strike));
 									if (typedWords != 0) Log.warning("[STRIKE]: " + strike);
 									
 									if (!infinite && strike >= 10)
 									{
 										gameOver = true;
-										break outerloop;
+										break outer_loop;
 									}
 									break;
 
@@ -407,39 +420,31 @@ public class Window extends Application
 									if (timeLeft <= 0)
 									{
 										gameOver = true;
-										break outerloop;
+										break outer_loop;
 									}
 									else Scenes.conditionVal.setText(String.valueOf(timeLeft));
 									break;
 							}
 						}
-						
-						// gay will remain rainbowish
-						if (!w.getValue().equals("I'm gay"))
-						{ 
-							if (xPos > 370) w.setColor(Colors.YELLOW);
-							if (xPos > 500) w.setColor(Colors.ORANGE);
-							if (xPos > 630) w.setColor(Colors.RED);
-						}
-
-						if (xPos > maxWordLen) fresh.remove(w); // if word is further than longest word remove it from list of new words
-						
+						// If word is further than longest word remove it from list of new words
+						if (xPos > maxWordLen) fresh.remove(w);
 					}
 
 					if (gameOver)
 					{
-						root.getChildren().removeAll(words); // remove all objects
+						// Remove all objects
+						root.getChildren().removeAll(words);
 						curtain(scene, root);
 					}
 					else words.removeAll(del);
 					
-					// if no words are on the screen and it's not the end of the game
+					// If no words are on the screen and it's not the end of the game
 					if (words.isEmpty())
 					{
 						if (!curtain && typedWords == 0) curtain(scene, root);
 						else
 						{
-							// else generate new words
+							// Else generate new words
 							for (int i = 0; i < howMany; i++)
 							{
 								Word word = createWord(strings, xVal_final, yVal_final, fresh);
@@ -452,7 +457,7 @@ public class Window extends Application
 					lastUpdate = now;
 				}
 
-				/* every [n] seconds add [m] new words if less than [x] are displayed */
+				// Every [n] seconds add [m] new words if less than [x] are displayed
 				if (now - lastUpdate2 >= howOften && typedWords > 4)
 				{
 					for (int i = 0; i < howMany; i++)
@@ -500,39 +505,43 @@ public class Window extends Application
 					break;
 
 				case SPACE:
-					// special word to end the game
+					// "Special word" to end the game
 					if (Scenes.input.getText().equals("killmenow")) curtain(scene, root);
-					// list for words to be deleted from "words" list
+					// List for words to be deleted from "words" list
 					List<Word> del = new ArrayList<Word>();
-					// list for words to be added to "words" list
+					// List for words to be added to "words" list
 					List<Word> add = new ArrayList<Word>();
 
 					for (Word w : words)
 					{
-						// if typed word is equal to any currently displayed
+						// If typed word is equal to any currently displayed
 						if (w.getValue().equals(Scenes.input.getText()))
 						{
-							// for marathon add time for typed word
+							// For marathon add time for typed word
 							timeLeft += (typedWords > 0) ? w.getLength() / 3 * multiplier : 0;
-							// add points accordingly to multiplier
+							// Add points accordingly to multiplier
 							points += w.getLength() * multiplier;
-							 // increase multiplier
+							// Increase multiplier
 							multiplier += multiplierAdd;
 							typedWords++;
-							typedChars += w.getValue().length(); // increase the amount of typed words and characters
+							// Increase the amount of typed words and characters
+							typedChars += w.getValue().length();
 							fresh.remove(w);
-							del.add(w); // remove from new words and add to deletion from main list
-							root.getChildren().remove(w); // remove from pane
-
-							Scenes.pointsVal.setText(String.valueOf(Math.round(points))); // update the points
+							// Remove from new words and add to deletion from main list
+							del.add(w);
+							// Remove from pane
+							root.getChildren().remove(w);
+							// Update the points
+							Scenes.pointsVal.setText(String.valueOf(Math.round(points)));
 
 							switch (typedWords)
 							{
 								case 1:
 									startTime = System.nanoTime();
-									game_timer.start(); // after typing first word start timer for CPM
+									// After typing first word start timer for CPM
+									game_timer.start();
 
-									/* add [m] new words */
+									// Add [m] new words
 									for (int i = 0; i < howMany; i++)
 									{
 										Word word = createWord(strings, xVal_final, yVal_final, fresh);
@@ -553,7 +562,7 @@ public class Window extends Application
 									break;
 
 								default:
-									/* every 6th typed word add [m] new words */
+									// Every 6th typed word add [m] new words
 									if (typedWords % 6 == 0)
 										for (int i = 0; i < howMany; i++)
 										{
@@ -566,11 +575,11 @@ public class Window extends Application
 							}
 						}
 					}
-					 // add words
+					// Add words
 					words.addAll(add);
-					 // delete words
+					// Delete words
 					words.removeAll(del);
-					// clear text field
+					// Clear text field
 					Scenes.input.clear();
 					break;
 				default:
