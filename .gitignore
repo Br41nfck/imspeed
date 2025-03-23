@@ -7,5 +7,5 @@ doc/
 target/
 .classpath
 .project
-pom.xml
-README.md
+*.md
+*.xml
